@@ -164,9 +164,11 @@ index.html
 const CONFIG = {
   // All values from Implementation Specification
   COLORS: {
-    BODY: '#2D5A27',      // Muted forest green - sophisticated, not vibrant
-    WINGS: '#4A7C59',     // Muted lighter green - subtle depth
-    BACKGROUND: '#FFFFFF' // Pure white - clean minimal backdrop
+    BODY: '#000000',      // Pure black - bold, modern, sophisticated
+    WINGS: '#000000',     // Pure black - unified aesthetic
+    HEAD: '#000000',      // Pure black - consistent throughout
+    TAIL: '#000000',      // Pure black - unified aesthetic
+    BACKGROUND: '#FFFFFF' // Pure white - maximum contrast
   },
   DIMENSIONS: {
     BODY_WIDTH: 20,       // Hexagonal or diamond polygon
@@ -270,7 +272,7 @@ function init() {
 ## Implementation Values Strategy
 
 ### Use Exact Specification Values
-- **Colors**: `#2D5A27` (muted forest green body), `#4A7C59` (muted lighter green wings), `#FFFFFF` (background)
+- **Colors**: `#000000` (pure black for all parts - body, wings, head, tail), `#FFFFFF` (white background for maximum contrast)
 - **Dimensions**: 20×30px hexagonal/diamond body, 15×25px triangular wings, 8×12px triangular head, 6×10px triangular tail (all polygons, with responsive scaling)
 - **Timing**: 1000ms movement duration, 40/120 BPM wing frequencies
 - **Physics**: 8px hover threshold, 20px movement threshold, speed * 0.02 tilt

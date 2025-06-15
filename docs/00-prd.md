@@ -13,6 +13,8 @@ A browser-based application featuring a realistic hummingbird that follows the u
   - **Head**: Small triangular polygon that can rotate independently for beak direction
   - **Tail**: Small triangular polygon that can adjust independently during flight
   - All polygonal shapes with sharp vertices - no curves or rounded edges
+  - **Color**: Pure black (`#000000`) for all parts - bold, modern, sophisticated
+  - **Contrast**: Maximum contrast with pure white background
   - Each part moves independently during flight for dynamic articulation
   - Flat design with no gradients, shadows, or decorative elements
   - Modern tech aesthetic (Apple/Tesla style) - precise, mathematical polygons

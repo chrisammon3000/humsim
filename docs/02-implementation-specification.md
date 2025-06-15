@@ -116,7 +116,7 @@ function drawBody(ctx, position, bodyState, dimensions) {
   ctx.translate(position.x, position.y);
   ctx.rotate(bodyState.angle);
   ctx.scale(bodyState.scale, Math.cos(bodyState.tilt)); // Tilt effect
-  ctx.fillStyle = '#2D5A27'; // Muted forest green - sophisticated, not vibrant
+  ctx.fillStyle = '#000000'; // Pure black - bold, modern, sophisticated
   
   // Draw hexagonal body (option 1)
   ctx.beginPath();
@@ -143,7 +143,7 @@ function drawWing(ctx, position, wingState, dimensions, isLeft) {
   ctx.translate(position.x + wingState.offset.x, position.y + wingState.offset.y);
   ctx.rotate(wingState.angle);
   ctx.scale(wingState.scale, 1);
-  ctx.fillStyle = '#4A7C59'; // Muted lighter green for subtle depth
+  ctx.fillStyle = '#000000'; // Pure black - consistent throughout
   
   ctx.beginPath();
   // Isosceles triangles with sharp, precise vertices - no rounded corners
@@ -167,7 +167,7 @@ function drawHead(ctx, position, headState, dimensions) {
   ctx.save();
   ctx.translate(position.x + headState.offset.x, position.y + headState.offset.y);
   ctx.rotate(headState.angle); // Points toward movement direction
-  ctx.fillStyle = '#2D5A27'; // Same color as body for unity
+  ctx.fillStyle = '#000000'; // Pure black - unified aesthetic
   
   ctx.beginPath();
   // Sharp triangular beak pointing forward
@@ -187,7 +187,7 @@ function drawTail(ctx, position, tailState, dimensions) {
   ctx.save();
   ctx.translate(position.x + tailState.offset.x, position.y + tailState.offset.y);
   ctx.rotate(tailState.angle); // Adjusts for flight dynamics
-  ctx.fillStyle = '#4A7C59'; // Wing color for visual balance
+  ctx.fillStyle = '#000000'; // Pure black - unified aesthetic
   
   ctx.beginPath();
   // Small triangular tail
@@ -201,14 +201,14 @@ function drawTail(ctx, position, tailState, dimensions) {
 ```
 
 ### Color Palette
-- **Body**: `#2D5A27` (muted forest green - sophisticated, not vibrant)
-- **Head**: `#2D5A27` (same as body for visual unity)
-- **Wings**: `#4A7C59` (muted lighter green - subtle depth without gradients)
-- **Tail**: `#4A7C59` (same as wings for visual balance)
-- **Background**: `#FFFFFF` (pure white - clean minimal backdrop)
+- **Body**: `#000000` (pure black - bold, modern, sophisticated)
+- **Head**: `#000000` (same as body for visual unity)
+- **Wings**: `#000000` (consistent black throughout)
+- **Tail**: `#000000` (unified black aesthetic)
+- **Background**: `#FFFFFF` (pure white - maximum contrast with black bird)
 - **Motion Blur Overlay**: `rgba(255, 255, 255, 0.15)` (sophisticated motion blur - subtle ghosting effect)
 
-**Design Philosophy**: Muted colors with flat design aesthetic. No gradients, highlights, or shadows. All polygonal shapes with sharp vertices - NO CURVES. Each part moves independently for dynamic articulation. Colors chosen for modern tech sophistication (Apple/Tesla style).
+**Design Philosophy**: Bold black polygons on white background for maximum contrast and modern minimalism. No gradients, highlights, or shadows. All polygonal shapes with sharp vertices - NO CURVES. Each part moves independently for dynamic articulation. Pure black chosen for ultimate sophistication and timeless appeal.
 
 ### Motion Blur Implementation
 ```javascript

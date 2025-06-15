@@ -116,8 +116,8 @@ This document provides a detailed step-by-step implementation plan for the HumSi
 - [ ] Create triangular tail polygon (6×10px) that adjusts independently
 - [ ] Add body rotation based on overall movement direction
 - [ ] Apply speed-based body tilt transformation
-- [ ] Set body/head color to `#2D5A27` (muted forest green)
-- [ ] Set tail color to `#4A7C59` (matches wings)
+- [ ] Set all polygon colors to `#000000` (pure black for unified aesthetic)
+- [ ] Ensure maximum contrast with white background
 - [ ] Implement responsive scaling with mathematical precision
 - [ ] Add proper canvas transformation handling (save/restore) for each part
 - [ ] Ensure ALL POLYGONAL SHAPES - NO CURVES anywhere
