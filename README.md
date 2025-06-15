@@ -2,6 +2,10 @@
 
 A browser-based application featuring a realistic hummingbird that follows the user's mouse cursor with authentic flight physics and wing animation.
 
+<div align="center">
+  <img src="img/humsim.png" alt="HumSim - Polygonal Hummingbird" width="300">
+</div>
+
 ## Overview
 
 HumSim is an interactive polygonal hummingbird simulation that demonstrates realistic flight behavior through geometric minimalism. The application features a pure black hummingbird composed of independent polygonal parts (hexagonal body, triangular wings, head, and tail) that move independently to create dynamic, articulated flight behavior.
