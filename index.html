@@ -423,6 +423,9 @@
       // Update movement state and handle transitions
       updateMovementState();
       
+      // Update independent part animations
+      updateWingAnimation(deltaTime);
+      
       // Check if we've reached the target (hover detection)
       const distanceToTarget = calculateDistance(hummingbird.position, hummingbird.targetPosition);
       if (distanceToTarget <= CONFIG.PHYSICS.HOVER_THRESHOLD && hummingbird.isMoving) {
@@ -458,6 +461,27 @@
       }
     }
 
+    function updateWingAnimation(deltaTime) {
+      const currentTime = Date.now();
+      
+      // Calculate wing phase based on current BPM
+      const leftWingPhase = (currentTime * hummingbird.leftWing.bpm / 60000) % (2 * Math.PI);
+      const rightWingPhase = (currentTime * hummingbird.rightWing.bpm / 60000 + hummingbird.rightWing.phase) % (2 * Math.PI);
+      
+      // Wing rotation cycle (±45 degree range)
+      hummingbird.leftWing.angle = Math.sin(leftWingPhase) * (Math.PI / 4); // ±45 degrees
+      hummingbird.rightWing.angle = Math.sin(rightWingPhase) * (Math.PI / 4); // ±45 degrees
+      
+      // Wing scaling (simulate folding/extending) - 0.8 to 1.2 range
+      hummingbird.leftWing.scale = 0.8 + Math.abs(Math.sin(leftWingPhase)) * 0.4;
+      hummingbird.rightWing.scale = 0.8 + Math.abs(Math.sin(rightWingPhase)) * 0.4;
+      
+      // Log wing animation data for debugging
+      if (frameCount % 120 === 0) { // Every 2 seconds
+        console.log(`Wing Animation - Left: ${(hummingbird.leftWing.angle * 180 / Math.PI).toFixed(1)}°, Right: ${(hummingbird.rightWing.angle * 180 / Math.PI).toFixed(1)}°, BPM: ${hummingbird.leftWing.bpm}`);
+      }
+    }
+
     function render() {
       // Clear canvas with white background
       ctx.fillStyle = CONFIG.COLORS.BACKGROUND;
@@ -481,6 +505,8 @@
       const scaledDimensions = {
         bodyWidth: CONFIG.DIMENSIONS.BODY_WIDTH * scale,
         bodyHeight: CONFIG.DIMENSIONS.BODY_HEIGHT * scale,
+        wingBase: CONFIG.DIMENSIONS.WING_BASE * scale,
+        wingHeight: CONFIG.DIMENSIONS.WING_HEIGHT * scale,
         headBase: CONFIG.DIMENSIONS.HEAD_BASE * scale,
         headHeight: CONFIG.DIMENSIONS.HEAD_HEIGHT * scale,
         tailBase: CONFIG.DIMENSIONS.TAIL_BASE * scale,
@@ -492,6 +518,10 @@
       
       // Draw head (triangle)
       drawTriangularHead(hummingbird.position, hummingbird.head, scaledDimensions);
+      
+      // Draw wings (triangles) - each wing independently
+      drawTriangularWing(hummingbird.position, hummingbird.leftWing, scaledDimensions, true);
+      drawTriangularWing(hummingbird.position, hummingbird.rightWing, scaledDimensions, false);
       
       // Draw tail (triangle)
       drawTriangularTail(hummingbird.position, hummingbird.tail, scaledDimensions);
@@ -555,6 +585,23 @@
       ctx.restore();
     }
 
+    function drawTriangularWing(position, wingState, dimensions, isLeft) {
+      ctx.save();
+      ctx.translate(position.x + wingState.offset.x, position.y + wingState.offset.y);
+      ctx.rotate(wingState.angle); // Wing rotation based on animation
+      ctx.scale(wingState.scale, 1); // Wing scaling for folding/extending effect
+      ctx.fillStyle = CONFIG.COLORS.WINGS;
+      
+      // Draw isosceles triangle with sharp, precise vertices - no rounded corners
+      ctx.beginPath();
+      ctx.moveTo(0, 0); // Attachment point to body
+      ctx.lineTo(dimensions.wingBase/2, -dimensions.wingHeight);
+      ctx.lineTo(-dimensions.wingBase/2, -dimensions.wingHeight);
+      ctx.closePath();
+      ctx.fill(); // Solid 100% opacity - flat design aesthetic
+      ctx.restore();
+    }
+
     // ========================================
     // 9. INITIALIZATION
     // ========================================
@@ -578,9 +625,9 @@
       // Start the main animation loop
       requestAnimationFrame(animationLoop);
       console.log('Animation loop started - Target: 60 FPS');
-      console.log('Step 3.1 Complete: Polygonal hummingbird rendering with independent parts');
-      console.log('You should see a black polygonal hummingbird (hexagon body, triangular head/tail)');
-      console.log('Body tilts during flight, head points toward movement, tail adjusts dynamics!');
+      console.log('Step 3.3 Complete: Independent part animation with articulated movement');
+      console.log('You should see a fully animated polygonal hummingbird with beating wings!');
+      console.log('Wings beat at 40 BPM (hover) or 120 BPM (flight) with independent rotation and scaling!');
     }
 
     // Start the application
