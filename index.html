@@ -439,8 +439,10 @@
       // Update velocity if moving
       if (hummingbird.isMoving) {
         updateVelocity();
-        updatePhysics();
       }
+      
+      // Always update physics (including body angle) regardless of movement state
+      updatePhysics();
       
       // Update movement state and handle transitions
       updateMovementState();
@@ -491,7 +493,7 @@
       
       // Define angle ranges (in radians from horizontal)
       // 0 = horizontal, PI/2 = vertical up, -PI/2 = vertical down
-      const hoverAngle = Math.PI / 3; // 60° from horizontal (30° from vertical)
+      const hoverAngle = Math.PI / 3; // 60° from horizontal (30° from vertical - should be visible!)
       const maxSpeedAngle = Math.PI / 18; // ~10° from horizontal (nearly horizontal at full speed)
       const maxExpectedSpeed = 15; // Maximum realistic speed for angle calculation
       
@@ -510,12 +512,12 @@
       const targetBodyAngle = baseAngle + verticalAdjustment;
       
       // Smooth interpolation to prevent jerky transitions
-      const lerpFactor = 0.15; // Faster transitions to see the effect
+      const lerpFactor = 0.2; // Even faster transitions to see the effect immediately
       hummingbird.body.angle = hummingbird.body.angle + (targetBodyAngle - hummingbird.body.angle) * lerpFactor;
       
-      // Debug logging
-      if (frameCount % 30 === 0) {
-        console.log(`Body Angle Debug - Speed: ${speed.toFixed(2)}, Target Angle: ${(targetBodyAngle * 180 / Math.PI).toFixed(1)}°, Current Angle: ${(hummingbird.body.angle * 180 / Math.PI).toFixed(1)}°`);
+      // Enhanced debug logging - always show when speed changes
+      if (frameCount % 30 === 0 || Math.abs(speed) > 0.1) {
+        console.log(`Body Angle Debug - Speed: ${speed.toFixed(2)}, Target: ${(targetBodyAngle * 180 / Math.PI).toFixed(1)}°, Current: ${(hummingbird.body.angle * 180 / Math.PI).toFixed(1)}°, IsMoving: ${hummingbird.isMoving}`);
       }
     }
 
