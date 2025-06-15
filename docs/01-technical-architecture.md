@@ -117,6 +117,14 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 ### Core Components
 
+```mermaid
+graph TB
+    A[Animation Engine<br/>requestAnimationFrame Loop<br/>60 FPS Target] -->|"Updates Physics"| B[Physics System<br/>Anime.js + Custom Physics<br/>Movement & Orientation]
+    B -->|"Sends Data to Render"| C[Rendering Pipeline<br/>Canvas 2D API<br/>Motion Blur + Shapes]
+    D[Input System<br/>Mouse Events<br/>Coordinate Mapping] -->|"Target Position"| B
+    C -->|"Frame Complete"| A
+```
+
 #### 1. Animation Engine
 - **Master Loop**: Single `requestAnimationFrame` loop
 - **Frame Timing**: Delta time calculations for consistent animation
@@ -139,6 +147,27 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 ### Data Flow
 
+```mermaid
+sequenceDiagram
+    participant User
+    participant Input as Input System
+    participant Physics as Physics System
+    participant Animation as Animation Engine
+    participant Render as Rendering Pipeline
+    
+    User->>Input: Mouse Movement
+    Input->>Physics: Update Target Position
+    Animation->>Physics: Request Physics Update
+    Physics->>Physics: Calculate Velocity & Orientation
+    Physics->>Animation: Return Updated State
+    Animation->>Render: Send Render Data
+    Render->>Render: Apply Motion Blur
+    Render->>Render: Draw Hummingbird
+    Render->>Animation: Frame Complete
+    Animation->>Animation: Schedule Next Frame (60 FPS)
+```
+
+**Process Steps**:
 1. **Input**: Mouse move event → Update target position
 2. **Physics**: Calculate movement toward target using Anime.js easing
 3. **Animation**: Update wing phase and body orientation
