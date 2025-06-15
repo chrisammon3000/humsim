@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HumSim - Polygonal Hummingbird Simulation</title>
+  
+  <!-- Anime.js CDN - Only external dependency -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  
+  <style>
+    /* CSS Reset and Fullscreen Canvas Setup */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #FFFFFF;
+    }
+    
+    #hummingbird-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #FFFFFF;
+      cursor: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <!-- Fullscreen Canvas Element -->
+  <canvas id="hummingbird-canvas"></canvas>
+
+  <script>
+    // ========================================
+    // 1. CONSTANTS AND CONFIGURATION
+    // ========================================
+    const CONFIG = {
+      // All values from Implementation Specification
+      COLORS: {
+        BODY: '#000000',      // Pure black - bold, modern, sophisticated
+        WINGS: '#000000',     // Pure black - unified aesthetic
+        HEAD: '#000000',      // Pure black - consistent throughout
+        TAIL: '#000000',      // Pure black - unified aesthetic
+        BACKGROUND: '#FFFFFF' // Pure white - maximum contrast
+      },
+      DIMENSIONS: {
+        BODY_WIDTH: 20,       // Hexagonal or diamond polygon
+        BODY_HEIGHT: 30,      // Polygon dimensions
+        WING_BASE: 15,        // Triangular polygons - independently moveable
+        WING_HEIGHT: 25,      // Sharp vertices, no rounded corners
+        HEAD_BASE: 8,         // Small triangular head
+        HEAD_HEIGHT: 12,      // Points in movement direction
+        TAIL_BASE: 6,         // Small triangular tail
+        TAIL_HEIGHT: 10       // Adjusts during flight
+      },
+      PHYSICS: {
+        MOVEMENT_DURATION: 1000,
+        HOVER_THRESHOLD: 8,
+        MOVEMENT_THRESHOLD: 20,
+        DEAD_ZONE: 5,
+        DEBOUNCE_TIME: 50
+      },
+      ANIMATION: {
+        HOVER_BPM: 40,
+        FLIGHT_BPM: 120,
+        RAMP_UP_TIME: 150,
+        RAMP_DOWN_TIME: 300
+      },
+      PERFORMANCE: {
+        TARGET_FPS: 60,
+        FRAME_TIME_CAP: 50,
+        FALLBACK_FPS: 45
+      }
+    };
+
+    // ========================================
+    // 2. CANVAS AND CONTEXT SETUP
+    // ========================================
+    const canvas = document.getElementById('hummingbird-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Initialize canvas size
+    function initializeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      console.log(`Canvas initialized: ${canvas.width}x${canvas.height}`);
+    }
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      const oldWidth = canvas.width;
+      const oldHeight = canvas.height;
+      
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      console.log(`Canvas resized: ${canvas.width}x${canvas.height}`);
+      
+      // Maintain relative hummingbird position (will implement later)
+      if (window.hummingbird) {
+        hummingbird.position.x *= (canvas.width / oldWidth);
+        hummingbird.position.y *= (canvas.height / oldHeight);
+      }
+    });
+
+    // ========================================
+    // 3. ANIMATION LOOP SYSTEM
+    // ========================================
+    let lastFrameTime = 0;
+    let frameCount = 0;
+    let fpsDisplay = 0;
+    const targetFrameTime = 1000 / CONFIG.PERFORMANCE.TARGET_FPS; // 16.67ms for 60 FPS
+
+    function animationLoop(currentTime) {
+      const deltaTime = Math.min(currentTime - lastFrameTime, CONFIG.PERFORMANCE.FRAME_TIME_CAP);
+      
+      if (deltaTime >= targetFrameTime) {
+        // Frame drop handling
+        if (deltaTime > 33) { // > 30 FPS
+          console.warn(`Frame drop detected: ${deltaTime.toFixed(2)}ms`);
+          // Skip physics updates, continue rendering for visual smoothness
+          render();
+        } else {
+          // Normal frame processing
+          update(deltaTime);
+          render();
+        }
+        
+        lastFrameTime = currentTime;
+        
+        // FPS monitoring
+        frameCount++;
+        if (frameCount % 60 === 0) {
+          fpsDisplay = Math.round(1000 / deltaTime);
+          console.log(`FPS: ${fpsDisplay}`);
+        }
+      }
+      
+      requestAnimationFrame(animationLoop);
+    }
+
+    // ========================================
+    // 4. HUMMINGBIRD STATE MANAGEMENT
+    // ========================================
+    const hummingbird = {
+      position: { x: 0, y: 0 },
+      velocity: { x: 0, y: 0 },
+      targetPosition: { x: 0, y: 0 },
+      isMoving: false,
+      speed: 0,
+      
+      // Independent polygonal parts
+      body: {
+        angle: 0,
+        scale: 1,
+        tilt: 0
+      },
+      leftWing: {
+        angle: 0,
+        scale: 1,
+        phase: 0,
+        offset: { x: -10, y: 0 },
+        bpm: CONFIG.ANIMATION.HOVER_BPM
+      },
+      rightWing: {
+        angle: 0,
+        scale: 1,
+        phase: Math.PI / 4, // Slight phase offset from left wing
+        offset: { x: 10, y: 0 },
+        bpm: CONFIG.ANIMATION.HOVER_BPM
+      },
+      head: {
+        angle: 0,
+        offset: { x: 0, y: -15 }
+      },
+      tail: {
+        angle: 0,
+        offset: { x: 0, y: 15 }
+      }
+    };
+
+    // Utility functions for hummingbird calculations
+    function calculateDistance(p1, p2) {
+      return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+    }
+
+    function calculateSpeed(velocity) {
+      return Math.sqrt(velocity.x ** 2 + velocity.y ** 2);
+    }
+
+    function constrainToCanvas(position) {
+      return {
+        x: Math.max(0, Math.min(canvas.width, position.x)),
+        y: Math.max(0, Math.min(canvas.height, position.y))
+      };
+    }
+
+    // Initialize hummingbird state
+    function initializeHummingbird() {
+      // Position at screen center
+      hummingbird.position.x = canvas.width / 2;
+      hummingbird.position.y = canvas.height / 2;
+      hummingbird.targetPosition.x = canvas.width / 2;
+      hummingbird.targetPosition.y = canvas.height / 2;
+      
+      console.log(`Hummingbird initialized at (${hummingbird.position.x}, ${hummingbird.position.y})`);
+    }
+
+    // Make hummingbird globally accessible for resize handling
+    window.hummingbird = hummingbird;
+
+    // ========================================
+    // 5. MOUSE INPUT SYSTEM
+    // ========================================
+    let mousePosition = { x: 0, y: 0 };
+    let lastMouseMoveTime = 0;
+    let isMouseTracking = false;
+
+    function setupMouseInput() {
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mouseenter', () => {
+        isMouseTracking = true;
+        console.log('Mouse tracking enabled');
+      });
+      canvas.addEventListener('mouseleave', () => {
+        isMouseTracking = false;
+        console.log('Mouse tracking disabled');
+      });
+    }
+
+    function handleMouseMove(event) {
+      const now = Date.now();
+      
+      // Debouncing to prevent jittery movement
+      if (now - lastMouseMoveTime < CONFIG.PHYSICS.DEBOUNCE_TIME) {
+        return;
+      }
+      
+      // Get canvas-relative coordinates
+      const rect = canvas.getBoundingClientRect();
+      const rawX = event.clientX - rect.left;
+      const rawY = event.clientY - rect.top;
+      
+      // Edge constraints - constrain to canvas bounds
+      const constrainedX = Math.max(0, Math.min(canvas.width, rawX));
+      const constrainedY = Math.max(0, Math.min(canvas.height, rawY));
+      
+      mousePosition.x = constrainedX;
+      mousePosition.y = constrainedY;
+      lastMouseMoveTime = now;
+      
+      // Log mouse position for testing
+      if (frameCount % 60 === 0) {
+        console.log(`Mouse: (${mousePosition.x.toFixed(1)}, ${mousePosition.y.toFixed(1)})`);
+      }
+    }
+
+    // ========================================
+    // 5. UPDATE AND RENDER FUNCTIONS
+    // ========================================
+    function update(deltaTime) {
+      // Physics and animation updates will be implemented here
+      // For now, just placeholder
+    }
+
+    function render() {
+      // Clear canvas with white background
+      ctx.fillStyle = CONFIG.COLORS.BACKGROUND;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw basic hummingbird at current position
+      drawHummingbird();
+      
+      // Visual feedback: show dot at mouse position for testing
+      if (isMouseTracking) {
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'; // Semi-transparent red for target
+        ctx.beginPath();
+        ctx.arc(mousePosition.x, mousePosition.y, 3, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    }
+
+    // Basic hummingbird rendering function
+    function drawHummingbird() {
+      const scale = canvas.width / 1920; // Responsive scaling
+      const scaledDimensions = {
+        bodyWidth: CONFIG.DIMENSIONS.BODY_WIDTH * scale,
+        bodyHeight: CONFIG.DIMENSIONS.BODY_HEIGHT * scale,
+        headBase: CONFIG.DIMENSIONS.HEAD_BASE * scale,
+        headHeight: CONFIG.DIMENSIONS.HEAD_HEIGHT * scale,
+        tailBase: CONFIG.DIMENSIONS.TAIL_BASE * scale,
+        tailHeight: CONFIG.DIMENSIONS.TAIL_HEIGHT * scale
+      };
+
+      // Draw body (hexagon)
+      drawPolygonalBody(hummingbird.position, scaledDimensions);
+      
+      // Draw head (triangle)
+      drawTriangularHead(hummingbird.position, hummingbird.head, scaledDimensions);
+      
+      // Draw tail (triangle)
+      drawTriangularTail(hummingbird.position, hummingbird.tail, scaledDimensions);
+    }
+
+    function drawPolygonalBody(position, dimensions) {
+      ctx.save();
+      ctx.translate(position.x, position.y);
+      ctx.rotate(hummingbird.body.angle);
+      ctx.fillStyle = CONFIG.COLORS.BODY;
+      
+      // Draw hexagonal body
+      ctx.beginPath();
+      const sides = 6;
+      const radius = dimensions.bodyWidth / 2;
+      for (let i = 0; i < sides; i++) {
+        const angle = (i * 2 * Math.PI) / sides;
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawTriangularHead(position, headState, dimensions) {
+      ctx.save();
+      ctx.translate(position.x + headState.offset.x, position.y + headState.offset.y);
+      ctx.rotate(headState.angle);
+      ctx.fillStyle = CONFIG.COLORS.HEAD;
+      
+      ctx.beginPath();
+      ctx.moveTo(0, 0); // Attachment point to body
+      ctx.lineTo(dimensions.headBase/2, dimensions.headHeight);
+      ctx.lineTo(-dimensions.headBase/2, dimensions.headHeight);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawTriangularTail(position, tailState, dimensions) {
+      ctx.save();
+      ctx.translate(position.x + tailState.offset.x, position.y + tailState.offset.y);
+      ctx.rotate(tailState.angle);
+      ctx.fillStyle = CONFIG.COLORS.TAIL;
+      
+      ctx.beginPath();
+      ctx.moveTo(0, 0); // Attachment point to body
+      ctx.lineTo(dimensions.tailBase/2, -dimensions.tailHeight);
+      ctx.lineTo(-dimensions.tailBase/2, -dimensions.tailHeight);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ========================================
+    // 6. INITIALIZATION
+    // ========================================
+    function init() {
+      console.log('HumSim initializing...');
+      initializeCanvas();
+      console.log('Canvas setup complete');
+      
+      setupMouseInput();
+      console.log('Mouse input system initialized');
+      
+      initializeHummingbird();
+      console.log('Hummingbird state object initialized');
+      
+      // Initialize mouse position to center
+      mousePosition.x = canvas.width / 2;
+      mousePosition.y = canvas.height / 2;
+      
+      console.log('Starting animation loop...');
+      
+      // Start the main animation loop
+      requestAnimationFrame(animationLoop);
+      console.log('Animation loop started - Target: 60 FPS');
+      console.log('Phase 1 Complete: Basic infrastructure ready');
+      console.log('You should see a black polygonal hummingbird at screen center');
+      console.log('Move your mouse to see the red target dot');
+    }
+
+    // Start the application
+    init();
+  </script>
+</body>
+</html>
