@@ -7,11 +7,15 @@ A browser-based application featuring a realistic hummingbird that follows the u
 
 ### Visual Design
 - **Background**: Blank white screen
-- **Hummingbird**: Geometric minimalism with modern tech aesthetic
-  - Perfect mathematical ellipse body (20×30px) that tilts based on movement direction
-  - Clean triangular wings (15×25px) with sharp vertices and sophisticated motion blur
+- **Hummingbird**: Geometric minimalism with polygonal architecture
+  - **Body**: Hexagonal or diamond-shaped polygon (20×30px) that tilts based on movement direction
+  - **Wings**: Triangular polygons (15×25px) with sharp vertices - each wing moves independently
+  - **Head**: Small triangular polygon that can rotate independently for beak direction
+  - **Tail**: Small triangular polygon that can adjust independently during flight
+  - All polygonal shapes with sharp vertices - no curves or rounded edges
+  - Each part moves independently during flight for dynamic articulation
   - Flat design with no gradients, shadows, or decorative elements
-  - Modern tech aesthetic (Apple/Tesla style) - precise, mathematical shapes
+  - Modern tech aesthetic (Apple/Tesla style) - precise, mathematical polygons
   - No pre-made sprites - all shapes drawn programmatically using mathematical precision
 
 ### Movement Physics
@@ -26,12 +30,17 @@ A browser-based application featuring a realistic hummingbird that follows the u
 
 ### Wing Animation System
 - **Multi-Property Animation**:
-  - Wing rotation (primary movement)
-  - Wing scaling (simulate folding/extending)
-  - Wing angle adjustment based on travel direction
+  - Wing rotation (primary movement) - each wing independently
+  - Wing scaling (simulate folding/extending) - triangular shape deformation
+  - Wing angle adjustment based on travel direction - independent per wing
+  - Head rotation for beak direction pointing
+  - Tail adjustment for flight dynamics
 - **Speed Variation**:
   - Slower wing beat during hover
   - Faster wing beat during flight
+- **Independent Part Movement**:
+  - Each polygonal part (body, left wing, right wing, head, tail) moves independently
+  - Dynamic articulation creates realistic flight behavior
 - **Motion Blur Effect**:
   - Sophisticated canvas trail technique
   - Semi-transparent overlay instead of full canvas clear

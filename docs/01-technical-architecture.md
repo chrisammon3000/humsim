@@ -29,8 +29,12 @@ hummingbirdState = {
   velocity: {x, y},
   targetPosition: {x, y},
   isMoving: boolean,
-  wingPhase: number,
-  bodyAngle: number
+  // Independent part states
+  body: {angle: number, scale: number},
+  leftWing: {angle: number, scale: number, phase: number},
+  rightWing: {angle: number, scale: number, phase: number},
+  head: {angle: number, offset: {x, y}},
+  tail: {angle: number, offset: {x, y}}
 }
 ```
 
@@ -138,7 +142,9 @@ graph TB
 #### 3. Rendering Pipeline
 - **Canvas Setup**: Fullscreen responsive canvas (100vw × 100vh)
 - **Motion Blur**: Sophisticated semi-transparent overlay technique
-- **Shape Drawing**: Geometric minimalism - perfect mathematical ellipse body, clean triangular wings with sharp vertices
+- **Shape Drawing**: Geometric minimalism - all polygonal shapes with sharp vertices (no curves)
+- **Independent Parts**: Body (hexagon/diamond), wings (triangles), head (triangle), tail (triangle)
+- **Articulated Rendering**: Each part rendered independently with its own transformation matrix
 - **Design Philosophy**: Flat design with no gradients, shadows, or decorative elements
 
 #### 4. Input System

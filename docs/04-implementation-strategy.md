@@ -169,10 +169,14 @@ const CONFIG = {
     BACKGROUND: '#FFFFFF' // Pure white - clean minimal backdrop
   },
   DIMENSIONS: {
-    BODY_WIDTH: 20,       // Perfect mathematical ellipse
-    BODY_HEIGHT: 30,      // 2:3 ratio for streamlined silhouette
-    WING_BASE: 15,        // Isosceles triangles
-    WING_HEIGHT: 25       // Sharp vertices, no rounded corners
+    BODY_WIDTH: 20,       // Hexagonal or diamond polygon
+    BODY_HEIGHT: 30,      // Polygon dimensions
+    WING_BASE: 15,        // Triangular polygons - independently moveable
+    WING_HEIGHT: 25,      // Sharp vertices, no rounded corners
+    HEAD_BASE: 8,         // Small triangular head
+    HEAD_HEIGHT: 12,      // Points in movement direction
+    TAIL_BASE: 6,         // Small triangular tail
+    TAIL_HEIGHT: 10       // Adjusts during flight
   },
   PHYSICS: {
     MOVEMENT_DURATION: 1000,
@@ -267,18 +271,20 @@ function init() {
 
 ### Use Exact Specification Values
 - **Colors**: `#2D5A27` (muted forest green body), `#4A7C59` (muted lighter green wings), `#FFFFFF` (background)
-- **Dimensions**: 20×30px perfect mathematical ellipse body, 15×25px isosceles triangle wings (with responsive scaling)
+- **Dimensions**: 20×30px hexagonal/diamond body, 15×25px triangular wings, 8×12px triangular head, 6×10px triangular tail (all polygons, with responsive scaling)
 - **Timing**: 1000ms movement duration, 40/120 BPM wing frequencies
 - **Physics**: 8px hover threshold, 20px movement threshold, speed * 0.02 tilt
 - **Visual**: `rgba(255, 255, 255, 0.15)` sophisticated motion blur alpha
 - **Performance**: 60 FPS target, 50ms frame time cap
 
 ### Design Philosophy Requirements
-- **Geometric Minimalism**: Perfect mathematical shapes with mathematical precision
+- **Polygonal Architecture**: ALL shapes are polygons with sharp vertices - NO CURVES anywhere
+- **Independent Articulation**: Each part (body, wings, head, tail) moves independently during flight
 - **Modern Tech Aesthetic**: Apple/Tesla style - sophisticated, refined, timeless
 - **Flat Design**: No gradients, shadows, highlights, or decorative elements
-- **Mathematical Precision**: Use `ctx.ellipse()` for perfect ellipses, sharp vertices for triangles
-- **Sophisticated Motion**: Subtle ghosting effects that suggest motion without overwhelming forms
+- **Mathematical Precision**: Use polygon drawing functions, sharp vertices only
+- **Dynamic Movement**: Each polygonal part responds to flight state independently
+- **Sophisticated Motion**: Subtle ghosting effects that suggest motion without overwhelming geometric forms
 - **Clean Boundaries**: Anti-aliased edges only, no additional effects
 
 ### No Guessing Policy

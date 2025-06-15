@@ -108,19 +108,22 @@ This document provides a detailed step-by-step implementation plan for the HumSi
 ### Phase 3: Visual Rendering (Shape & Animation)
 
 #### Step 3.1: Basic Shape Rendering
-**Objective**: Draw the geometric minimalist hummingbird body with mathematical precision
+**Objective**: Draw the polygonal hummingbird with independent articulated parts
 
 **Tasks**:
-- [ ] Implement perfect mathematical ellipse body rendering (20×30px base, 2:3 ratio)
-- [ ] Add body rotation based on beak direction
+- [ ] Implement hexagonal or diamond body polygon rendering (20×30px base)
+- [ ] Create triangular head polygon (8×12px) that rotates independently
+- [ ] Create triangular tail polygon (6×10px) that adjusts independently
+- [ ] Add body rotation based on overall movement direction
 - [ ] Apply speed-based body tilt transformation
-- [ ] Set body color to `#2D5A27` (muted forest green - sophisticated aesthetic)
-- [ ] Implement responsive scaling: `size * (canvas.width / 1920)` with mathematical precision
-- [ ] Add proper canvas transformation handling (save/restore)
-- [ ] Ensure flat design - no gradients, shadows, or decorative elements
-- [ ] Use `ctx.ellipse()` for perfect mathematical shapes
+- [ ] Set body/head color to `#2D5A27` (muted forest green)
+- [ ] Set tail color to `#4A7C59` (matches wings)
+- [ ] Implement responsive scaling with mathematical precision
+- [ ] Add proper canvas transformation handling (save/restore) for each part
+- [ ] Ensure ALL POLYGONAL SHAPES - NO CURVES anywhere
+- [ ] Each part has independent transformation matrix
 
-**Expected Outcome**: Hummingbird body renders with geometric minimalism and modern tech aesthetic
+**Expected Outcome**: Polygonal hummingbird with independently moving parts renders correctly
 
 #### Step 3.2: Wing System
 **Objective**: Create clean triangular wings with sharp vertices and geometric precision
@@ -137,18 +140,21 @@ This document provides a detailed step-by-step implementation plan for the HumSi
 
 **Expected Outcome**: Wings render as clean geometric triangles with minimalist aesthetic
 
-#### Step 3.3: Wing Animation Logic
-**Objective**: Implement speed-dependent wing beat frequency and realistic motion
+#### Step 3.3: Independent Part Animation Logic
+**Objective**: Implement independent animation for each polygonal part
 
 **Tasks**:
-- [ ] Start wing animation at 40 BPM (hover state)
-- [ ] Implement transition to 120 BPM during flight
-- [ ] Add 150ms ramp up time, 300ms ramp down time
-- [ ] Calculate wing phase: `(Date.now() * BPM / 60000) % (2π)`
-- [ ] Apply ±45° wing rotation range
-- [ ] Implement wing speed variation based on movement state
+- [ ] **Wing Animation**: Start at 40 BPM (hover), transition to 120 BPM (flight)
+- [ ] **Independent Wing Control**: Left and right wings animate separately with slight phase offset
+- [ ] **Head Animation**: Triangular head rotates to point toward movement direction
+- [ ] **Tail Animation**: Triangular tail adjusts angle based on flight dynamics
+- [ ] **Body Animation**: Hexagon/diamond tilts based on speed and direction
+- [ ] Add 150ms ramp up time, 300ms ramp down time for wing transitions
+- [ ] Calculate independent phases for each part
+- [ ] Apply ±45° wing rotation range, smaller ranges for head/tail
+- [ ] Implement articulated movement - each part responds to flight state independently
 
-**Expected Outcome**: Wing beat frequency changes realistically with bird movement state
+**Expected Outcome**: All polygonal parts move independently creating dynamic, articulated flight behavior
 
 ---
 

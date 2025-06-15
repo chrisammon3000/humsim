@@ -67,12 +67,23 @@ const wingAngle = baseAngle + (isturning ? bankingAngle : 0);
 
 ### Hummingbird Dimensions
 ```javascript
-// Base dimensions (at 1920px screen width) - Geometric Minimalism
+// Base dimensions (at 1920px screen width) - Polygonal Architecture
 const baseDimensions = {
-  bodyWidth: 20,    // Perfect mathematical ellipse
-  bodyHeight: 30,   // 2:3 ratio for streamlined silhouette
-  wingBase: 15,     // Isosceles triangles
-  wingHeight: 25    // Sharp vertices, no rounded corners
+  // Body: Hexagonal or diamond polygon
+  bodyWidth: 20,     // Polygon width
+  bodyHeight: 30,    // Polygon height
+  
+  // Wings: Triangular polygons (independently moveable)
+  wingBase: 15,      // Triangle base
+  wingHeight: 25,    // Triangle height
+  
+  // Head: Small triangular polygon
+  headBase: 8,       // Triangle base for head
+  headHeight: 12,    // Triangle height for head
+  
+  // Tail: Small triangular polygon
+  tailBase: 6,       // Triangle base for tail
+  tailHeight: 10     // Triangle height for tail
 };
 
 // Responsive scaling - maintains mathematical precision
@@ -81,11 +92,16 @@ const dimensions = {
   bodyWidth: baseDimensions.bodyWidth * scale,
   bodyHeight: baseDimensions.bodyHeight * scale,
   wingBase: baseDimensions.wingBase * scale,
-  wingHeight: baseDimensions.wingHeight * scale
+  wingHeight: baseDimensions.wingHeight * scale,
+  headBase: baseDimensions.headBase * scale,
+  headHeight: baseDimensions.headHeight * scale,
+  tailBase: baseDimensions.tailBase * scale,
+  tailHeight: baseDimensions.tailHeight * scale
 };
 
-// Design Philosophy: Modern tech aesthetic (Apple/Tesla style)
-// - No gradients, shadows, or decorative elements
+// Design Philosophy: Polygonal minimalism
+// - All shapes are polygons with sharp vertices - NO CURVES
+// - Each part moves independently during flight
 // - Flat design with mathematical precision
 // - Clean, anti-aliased boundaries only
 ```
@@ -94,51 +110,105 @@ const dimensions = {
 
 #### Body Rendering
 ```javascript
-// Perfect mathematical ellipse - geometric minimalism
-ctx.save();
-ctx.translate(position.x, position.y);
-ctx.rotate(beakAngle);
-ctx.scale(1, Math.cos(bodyTilt)); // Tilt effect
-ctx.fillStyle = '#2D5A27'; // Muted forest green - sophisticated, not vibrant
-ctx.beginPath();
-// Mathematical precision - perfect ellipse with crisp, anti-aliased boundaries
-ctx.ellipse(0, 0, dimensions.bodyWidth/2, dimensions.bodyHeight/2, 0, 0, 2*Math.PI);
-ctx.fill(); // Flat color fill only - no gradients or shadows
-ctx.restore();
+// Polygonal body (hexagon or diamond) - geometric minimalism
+function drawBody(ctx, position, bodyState, dimensions) {
+  ctx.save();
+  ctx.translate(position.x, position.y);
+  ctx.rotate(bodyState.angle);
+  ctx.scale(bodyState.scale, Math.cos(bodyState.tilt)); // Tilt effect
+  ctx.fillStyle = '#2D5A27'; // Muted forest green - sophisticated, not vibrant
+  
+  // Draw hexagonal body (option 1)
+  ctx.beginPath();
+  const sides = 6;
+  const radius = dimensions.bodyWidth / 2;
+  for (let i = 0; i < sides; i++) {
+    const angle = (i * 2 * Math.PI) / sides;
+    const x = radius * Math.cos(angle);
+    const y = radius * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill(); // Flat color fill only - no gradients or shadows
+  ctx.restore();
+}
 ```
 
 #### Wing Rendering  
 ```javascript
-// Clean triangular wings with sharp vertices - geometric minimalism
-const wings = [
-  { side: -1, x: -dimensions.bodyWidth/4 }, // Left wing
-  { side: 1, x: dimensions.bodyWidth/4 }    // Right wing
-];
-
-wings.forEach(wing => {
+// Independent triangular wings - each moves separately
+function drawWing(ctx, position, wingState, dimensions, isLeft) {
   ctx.save();
-  ctx.translate(position.x + wing.x, position.y);
-  ctx.rotate(beakAngle + wingRotation * wing.side);
-  ctx.scale(wingScale, 1);
+  ctx.translate(position.x + wingState.offset.x, position.y + wingState.offset.y);
+  ctx.rotate(wingState.angle);
+  ctx.scale(wingState.scale, 1);
   ctx.fillStyle = '#4A7C59'; // Muted lighter green for subtle depth
+  
   ctx.beginPath();
   // Isosceles triangles with sharp, precise vertices - no rounded corners
-  ctx.moveTo(0, 0);
+  ctx.moveTo(0, 0); // Attachment point to body
   ctx.lineTo(dimensions.wingBase/2, -dimensions.wingHeight);
   ctx.lineTo(-dimensions.wingBase/2, -dimensions.wingHeight);
   ctx.closePath();
   ctx.fill(); // Solid 100% opacity - flat design aesthetic
   ctx.restore();
-});
+}
+
+// Render each wing independently
+drawWing(ctx, position, hummingbird.leftWing, dimensions, true);
+drawWing(ctx, position, hummingbird.rightWing, dimensions, false);
+```
+
+#### Head Rendering
+```javascript
+// Independent triangular head - points in direction of travel
+function drawHead(ctx, position, headState, dimensions) {
+  ctx.save();
+  ctx.translate(position.x + headState.offset.x, position.y + headState.offset.y);
+  ctx.rotate(headState.angle); // Points toward movement direction
+  ctx.fillStyle = '#2D5A27'; // Same color as body for unity
+  
+  ctx.beginPath();
+  // Sharp triangular beak pointing forward
+  ctx.moveTo(0, 0); // Attachment point to body
+  ctx.lineTo(dimensions.headBase/2, dimensions.headHeight);
+  ctx.lineTo(-dimensions.headBase/2, dimensions.headHeight);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+```
+
+#### Tail Rendering
+```javascript
+// Independent triangular tail - adjusts during flight dynamics
+function drawTail(ctx, position, tailState, dimensions) {
+  ctx.save();
+  ctx.translate(position.x + tailState.offset.x, position.y + tailState.offset.y);
+  ctx.rotate(tailState.angle); // Adjusts for flight dynamics
+  ctx.fillStyle = '#4A7C59'; // Wing color for visual balance
+  
+  ctx.beginPath();
+  // Small triangular tail
+  ctx.moveTo(0, 0); // Attachment point to body
+  ctx.lineTo(dimensions.tailBase/2, -dimensions.tailHeight);
+  ctx.lineTo(-dimensions.tailBase/2, -dimensions.tailHeight);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
 ```
 
 ### Color Palette
 - **Body**: `#2D5A27` (muted forest green - sophisticated, not vibrant)
+- **Head**: `#2D5A27` (same as body for visual unity)
 - **Wings**: `#4A7C59` (muted lighter green - subtle depth without gradients)
+- **Tail**: `#4A7C59` (same as wings for visual balance)
 - **Background**: `#FFFFFF` (pure white - clean minimal backdrop)
 - **Motion Blur Overlay**: `rgba(255, 255, 255, 0.15)` (sophisticated motion blur - subtle ghosting effect)
 
-**Design Philosophy**: Muted colors with flat design aesthetic. No gradients, highlights, or shadows. Colors chosen for modern tech sophistication (Apple/Tesla style).
+**Design Philosophy**: Muted colors with flat design aesthetic. No gradients, highlights, or shadows. All polygonal shapes with sharp vertices - NO CURVES. Each part moves independently for dynamic articulation. Colors chosen for modern tech sophistication (Apple/Tesla style).
 
 ### Motion Blur Implementation
 ```javascript
