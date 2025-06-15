@@ -1,4 +1,4 @@
-# Hummingbird Browser App - Product Requirements Document
+# HumSim - Product Requirements Document
 
 ## Overview
 A browser-based application featuring a realistic hummingbird that follows the user's mouse cursor with authentic flight physics and wing animation.

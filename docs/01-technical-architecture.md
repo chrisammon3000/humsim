@@ -1,7 +1,7 @@
-# Hummingbird Browser App - Technical Architecture Document
+# HumSim - Technical Architecture Document
 
 ## Overview
-This document defines the critical architectural decisions and technical implementation strategy for the Hummingbird Browser App, based on the requirements outlined in the PRD.
+This document defines the critical architectural decisions and technical implementation strategy for the HumSim, based on the requirements outlined in the PRD.
 
 ## Critical Architectural Decisions
 

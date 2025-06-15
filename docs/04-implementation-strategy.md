@@ -1,7 +1,7 @@
-# Hummingbird Browser App - Implementation Strategy
+# HumSim - Implementation Strategy
 
 ## Overview
-This document outlines the detailed coding strategy for implementing the Hummingbird Browser App, following the requirements in documents 00-02 according to the plan in document 03.
+This document outlines the detailed coding strategy for implementing the HumSim, following the requirements in documents 00-02 according to the plan in document 03.
 
 ## Development Strategy
 

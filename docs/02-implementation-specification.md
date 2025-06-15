@@ -1,7 +1,7 @@
-# Hummingbird Browser App - Implementation Specification
+# HumSim - Implementation Specification
 
 ## Overview
-This document provides exact mathematical formulas, visual specifications, performance parameters, and behavioral thresholds for implementing the Hummingbird Browser App based on the Technical Architecture.
+This document provides exact mathematical formulas, visual specifications, performance parameters, and behavioral thresholds for implementing the HumSim based on the Technical Architecture.
 
 ## Mathematical Constants and Formulas
 
