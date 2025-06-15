@@ -108,30 +108,34 @@ This document provides a detailed step-by-step implementation plan for the HumSi
 ### Phase 3: Visual Rendering (Shape & Animation)
 
 #### Step 3.1: Basic Shape Rendering
-**Objective**: Draw the procedural hummingbird body with proper orientation
+**Objective**: Draw the geometric minimalist hummingbird body with mathematical precision
 
 **Tasks**:
-- [ ] Implement oval body rendering (20×30px base, responsively scaled)
+- [ ] Implement perfect mathematical ellipse body rendering (20×30px base, 2:3 ratio)
 - [ ] Add body rotation based on beak direction
 - [ ] Apply speed-based body tilt transformation
-- [ ] Set body color to `#2D5A27` (dark green)
-- [ ] Implement responsive scaling: `size * (canvas.width / 1920)`
+- [ ] Set body color to `#2D5A27` (muted forest green - sophisticated aesthetic)
+- [ ] Implement responsive scaling: `size * (canvas.width / 1920)` with mathematical precision
 - [ ] Add proper canvas transformation handling (save/restore)
+- [ ] Ensure flat design - no gradients, shadows, or decorative elements
+- [ ] Use `ctx.ellipse()` for perfect mathematical shapes
 
-**Expected Outcome**: Hummingbird body renders correctly with proper orientation and scaling
+**Expected Outcome**: Hummingbird body renders with geometric minimalism and modern tech aesthetic
 
 #### Step 3.2: Wing System
-**Objective**: Create animated triangle wings with realistic motion
+**Objective**: Create clean triangular wings with sharp vertices and geometric precision
 
 **Tasks**:
-- [ ] Implement triangle wing shape rendering (15×25px base, scaled)
+- [ ] Implement isosceles triangle wing shape rendering (15×25px base, scaled)
+- [ ] Ensure sharp vertices with no rounded corners - mathematical precision
 - [ ] Add wing positioning relative to body center
 - [ ] Create wing rotation cycle using sine wave calculations
 - [ ] Implement wing scaling (0.8 to 1.2 range) for folding effect
-- [ ] Set wing color to `#4A7C59` (lighter green)
+- [ ] Set wing color to `#4A7C59` (muted lighter green for subtle depth)
 - [ ] Add proper wing transformation handling
+- [ ] Maintain flat design aesthetic - solid fill only, no gradients
 
-**Expected Outcome**: Wings render as triangles and animate with basic rotation
+**Expected Outcome**: Wings render as clean geometric triangles with minimalist aesthetic
 
 #### Step 3.3: Wing Animation Logic
 **Objective**: Implement speed-dependent wing beat frequency and realistic motion
@@ -151,17 +155,18 @@ This document provides a detailed step-by-step implementation plan for the HumSi
 ### Phase 4: Motion Blur & Polish (Visual Effects)
 
 #### Step 4.1: Motion Blur Implementation
-**Objective**: Create convincing motion blur using canvas trail technique
+**Objective**: Create sophisticated motion blur that maintains geometric minimalism
 
 **Tasks**:
-- [ ] Apply semi-transparent overlay: `rgba(255, 255, 255, 0.15)`
+- [ ] Apply sophisticated semi-transparent overlay: `rgba(255, 255, 255, 0.15)`
 - [ ] Implement overlay before each hummingbird render
 - [ ] Ensure proper layering (blur → bird)
 - [ ] Test trail persistence (should last 6-8 frames)
-- [ ] Verify motion blur visibility during fast movement
-- [ ] Fine-tune alpha value for optimal effect
+- [ ] Verify sophisticated ghosting effect during movement
+- [ ] Ensure motion blur doesn't overwhelm geometric forms
+- [ ] Maintain minimalist aesthetic - subtle trails, not obvious streaks
 
-**Expected Outcome**: Wings show realistic motion blur trails during rapid movement
+**Expected Outcome**: Wings show sophisticated motion blur that suggests motion while preserving clean design
 
 #### Step 4.2: Performance Optimization
 **Objective**: Ensure stable 60 FPS performance across target devices

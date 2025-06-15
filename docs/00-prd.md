@@ -7,10 +7,12 @@ A browser-based application featuring a realistic hummingbird that follows the u
 
 ### Visual Design
 - **Background**: Blank white screen
-- **Hummingbird**: Procedurally animated using simple geometric shapes
-  - Oval body that tilts based on movement direction
-  - Wing triangles with realistic motion blur
-  - No pre-made sprites - all shapes drawn programmatically
+- **Hummingbird**: Geometric minimalism with modern tech aesthetic
+  - Perfect mathematical ellipse body (20×30px) that tilts based on movement direction
+  - Clean triangular wings (15×25px) with sharp vertices and sophisticated motion blur
+  - Flat design with no gradients, shadows, or decorative elements
+  - Modern tech aesthetic (Apple/Tesla style) - precise, mathematical shapes
+  - No pre-made sprites - all shapes drawn programmatically using mathematical precision
 
 ### Movement Physics
 - **Hover-Dart-Hover Behavior**: Authentic hummingbird flight pattern
@@ -31,9 +33,9 @@ A browser-based application featuring a realistic hummingbird that follows the u
   - Slower wing beat during hover
   - Faster wing beat during flight
 - **Motion Blur Effect**:
-  - Canvas trail technique
+  - Sophisticated canvas trail technique
   - Semi-transparent overlay instead of full canvas clear
-  - Creates natural wing blur streaks
+  - Creates subtle, refined wing blur streaks that suggest motion without overwhelming the geometric forms
 
 ### Technical Implementation
 

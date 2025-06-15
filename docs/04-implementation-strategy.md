@@ -164,15 +164,15 @@ index.html
 const CONFIG = {
   // All values from Implementation Specification
   COLORS: {
-    BODY: '#2D5A27',
-    WINGS: '#4A7C59',
-    BACKGROUND: '#FFFFFF'
+    BODY: '#2D5A27',      // Muted forest green - sophisticated, not vibrant
+    WINGS: '#4A7C59',     // Muted lighter green - subtle depth
+    BACKGROUND: '#FFFFFF' // Pure white - clean minimal backdrop
   },
   DIMENSIONS: {
-    BODY_WIDTH: 20,
-    BODY_HEIGHT: 30,
-    WING_BASE: 15,
-    WING_HEIGHT: 25
+    BODY_WIDTH: 20,       // Perfect mathematical ellipse
+    BODY_HEIGHT: 30,      // 2:3 ratio for streamlined silhouette
+    WING_BASE: 15,        // Isosceles triangles
+    WING_HEIGHT: 25       // Sharp vertices, no rounded corners
   },
   PHYSICS: {
     MOVEMENT_DURATION: 1000,
@@ -266,12 +266,20 @@ function init() {
 ## Implementation Values Strategy
 
 ### Use Exact Specification Values
-- **Colors**: `#2D5A27` (body), `#4A7C59` (wings), `#FFFFFF` (background)
-- **Dimensions**: 20×30px body, 15×25px wings (with responsive scaling)
+- **Colors**: `#2D5A27` (muted forest green body), `#4A7C59` (muted lighter green wings), `#FFFFFF` (background)
+- **Dimensions**: 20×30px perfect mathematical ellipse body, 15×25px isosceles triangle wings (with responsive scaling)
 - **Timing**: 1000ms movement duration, 40/120 BPM wing frequencies
 - **Physics**: 8px hover threshold, 20px movement threshold, speed * 0.02 tilt
-- **Visual**: `rgba(255, 255, 255, 0.15)` motion blur alpha
+- **Visual**: `rgba(255, 255, 255, 0.15)` sophisticated motion blur alpha
 - **Performance**: 60 FPS target, 50ms frame time cap
+
+### Design Philosophy Requirements
+- **Geometric Minimalism**: Perfect mathematical shapes with mathematical precision
+- **Modern Tech Aesthetic**: Apple/Tesla style - sophisticated, refined, timeless
+- **Flat Design**: No gradients, shadows, highlights, or decorative elements
+- **Mathematical Precision**: Use `ctx.ellipse()` for perfect ellipses, sharp vertices for triangles
+- **Sophisticated Motion**: Subtle ghosting effects that suggest motion without overwhelming forms
+- **Clean Boundaries**: Anti-aliased edges only, no additional effects
 
 ### No Guessing Policy
 - Every parameter must come from Implementation Specification

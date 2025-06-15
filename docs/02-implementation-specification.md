@@ -67,15 +67,15 @@ const wingAngle = baseAngle + (isturning ? bankingAngle : 0);
 
 ### Hummingbird Dimensions
 ```javascript
-// Base dimensions (at 1920px screen width)
+// Base dimensions (at 1920px screen width) - Geometric Minimalism
 const baseDimensions = {
-  bodyWidth: 20,
-  bodyHeight: 30,
-  wingBase: 15,
-  wingHeight: 25
+  bodyWidth: 20,    // Perfect mathematical ellipse
+  bodyHeight: 30,   // 2:3 ratio for streamlined silhouette
+  wingBase: 15,     // Isosceles triangles
+  wingHeight: 25    // Sharp vertices, no rounded corners
 };
 
-// Responsive scaling
+// Responsive scaling - maintains mathematical precision
 const scale = canvas.width / 1920;
 const dimensions = {
   bodyWidth: baseDimensions.bodyWidth * scale,
@@ -83,27 +83,33 @@ const dimensions = {
   wingBase: baseDimensions.wingBase * scale,
   wingHeight: baseDimensions.wingHeight * scale
 };
+
+// Design Philosophy: Modern tech aesthetic (Apple/Tesla style)
+// - No gradients, shadows, or decorative elements
+// - Flat design with mathematical precision
+// - Clean, anti-aliased boundaries only
 ```
 
 ### Shape Drawing Specifications
 
 #### Body Rendering
 ```javascript
-// Oval body with orientation
+// Perfect mathematical ellipse - geometric minimalism
 ctx.save();
 ctx.translate(position.x, position.y);
 ctx.rotate(beakAngle);
 ctx.scale(1, Math.cos(bodyTilt)); // Tilt effect
-ctx.fillStyle = '#2D5A27';
+ctx.fillStyle = '#2D5A27'; // Muted forest green - sophisticated, not vibrant
 ctx.beginPath();
+// Mathematical precision - perfect ellipse with crisp, anti-aliased boundaries
 ctx.ellipse(0, 0, dimensions.bodyWidth/2, dimensions.bodyHeight/2, 0, 0, 2*Math.PI);
-ctx.fill();
+ctx.fill(); // Flat color fill only - no gradients or shadows
 ctx.restore();
 ```
 
 #### Wing Rendering  
 ```javascript
-// Triangle wings with animation
+// Clean triangular wings with sharp vertices - geometric minimalism
 const wings = [
   { side: -1, x: -dimensions.bodyWidth/4 }, // Left wing
   { side: 1, x: dimensions.bodyWidth/4 }    // Right wing
@@ -114,31 +120,36 @@ wings.forEach(wing => {
   ctx.translate(position.x + wing.x, position.y);
   ctx.rotate(beakAngle + wingRotation * wing.side);
   ctx.scale(wingScale, 1);
-  ctx.fillStyle = '#4A7C59';
+  ctx.fillStyle = '#4A7C59'; // Muted lighter green for subtle depth
   ctx.beginPath();
+  // Isosceles triangles with sharp, precise vertices - no rounded corners
   ctx.moveTo(0, 0);
   ctx.lineTo(dimensions.wingBase/2, -dimensions.wingHeight);
   ctx.lineTo(-dimensions.wingBase/2, -dimensions.wingHeight);
   ctx.closePath();
-  ctx.fill();
+  ctx.fill(); // Solid 100% opacity - flat design aesthetic
   ctx.restore();
 });
 ```
 
 ### Color Palette
-- **Body**: `#2D5A27` (dark green)
-- **Wings**: `#4A7C59` (lighter green)
-- **Background**: `#FFFFFF` (pure white)
-- **Motion Blur Overlay**: `rgba(255, 255, 255, 0.15)`
+- **Body**: `#2D5A27` (muted forest green - sophisticated, not vibrant)
+- **Wings**: `#4A7C59` (muted lighter green - subtle depth without gradients)
+- **Background**: `#FFFFFF` (pure white - clean minimal backdrop)
+- **Motion Blur Overlay**: `rgba(255, 255, 255, 0.15)` (sophisticated motion blur - subtle ghosting effect)
+
+**Design Philosophy**: Muted colors with flat design aesthetic. No gradients, highlights, or shadows. Colors chosen for modern tech sophistication (Apple/Tesla style).
 
 ### Motion Blur Implementation
 ```javascript
-// Apply semi-transparent overlay each frame
+// Sophisticated motion blur - creates ghosting rather than obvious streaks
 ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 // Then draw hummingbird on top
 // Trail persistence: ~6-8 frames before fully faded
+// Effect: Suggests motion without overwhelming the geometric forms
+// Aesthetic: Subtle, sophisticated trails that maintain design minimalism
 ```
 
 ## Performance Parameters

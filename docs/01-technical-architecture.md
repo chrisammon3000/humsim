@@ -137,8 +137,9 @@ graph TB
 
 #### 3. Rendering Pipeline
 - **Canvas Setup**: Fullscreen responsive canvas (100vw × 100vh)
-- **Motion Blur**: Semi-transparent overlay technique
-- **Shape Drawing**: Procedural geometric shapes (oval body, triangle wings)
+- **Motion Blur**: Sophisticated semi-transparent overlay technique
+- **Shape Drawing**: Geometric minimalism - perfect mathematical ellipse body, clean triangular wings with sharp vertices
+- **Design Philosophy**: Flat design with no gradients, shadows, or decorative elements
 
 #### 4. Input System
 - **Mouse Tracking**: Event-driven position updates
