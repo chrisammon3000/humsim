@@ -156,6 +156,7 @@
       position: { x: 0, y: 0 },
       velocity: { x: 0, y: 0 },
       targetPosition: { x: 0, y: 0 },
+      lastPosition: null,
       isMoving: false,
       speed: 0,
       
@@ -212,6 +213,7 @@
       hummingbird.position.y = canvas.height / 2;
       hummingbird.targetPosition.x = canvas.width / 2;
       hummingbird.targetPosition.y = canvas.height / 2;
+      hummingbird.lastPosition = { x: canvas.width / 2, y: canvas.height / 2 };
       
       console.log(`Hummingbird initialized at (${hummingbird.position.x}, ${hummingbird.position.y})`);
     }
@@ -227,10 +229,10 @@
     let isMouseTracking = false;
 
     function setupMouseInput() {
-      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mousemove', handleMouseMoveWithMovement);
       canvas.addEventListener('mouseenter', () => {
         isMouseTracking = true;
-        console.log('Mouse tracking enabled');
+        console.log('Mouse tracking enabled - hummingbird will follow mouse');
       });
       canvas.addEventListener('mouseleave', () => {
         isMouseTracking = false;
@@ -266,11 +268,144 @@
     }
 
     // ========================================
-    // 5. UPDATE AND RENDER FUNCTIONS
+    // 6. MOVEMENT PHYSICS SYSTEM
+    // ========================================
+    let currentAnimation = null;
+    let lastTargetUpdate = 0;
+
+    function startMovement(targetX, targetY) {
+      // Check movement threshold (20px minimum)
+      const distance = calculateDistance(hummingbird.position, { x: targetX, y: targetY });
+      
+      if (distance < CONFIG.PHYSICS.MOVEMENT_THRESHOLD) {
+        return; // Too close, don't start movement
+      }
+
+      // Constrain target to canvas bounds
+      const constrainedTarget = constrainToCanvas({ x: targetX, y: targetY });
+      
+      // Update target position
+      hummingbird.targetPosition.x = constrainedTarget.x;
+      hummingbird.targetPosition.y = constrainedTarget.y;
+      hummingbird.isMoving = true;
+
+      // Clear any existing animation
+      if (currentAnimation) {
+        currentAnimation.pause();
+      }
+
+      console.log(`Starting movement to (${constrainedTarget.x.toFixed(1)}, ${constrainedTarget.y.toFixed(1)})`);
+
+      // Create Anime.js animation for hover-dart-hover movement
+      currentAnimation = anime({
+        targets: hummingbird.position,
+        x: constrainedTarget.x,
+        y: constrainedTarget.y,
+        duration: CONFIG.PHYSICS.MOVEMENT_DURATION,
+        easing: 'easeOutQuart', // Quick initial acceleration, smooth deceleration
+        update: function() {
+          // Update velocity for physics calculations
+          updateVelocity();
+        },
+        complete: function() {
+          hummingbird.isMoving = false;
+          hummingbird.velocity.x = 0;
+          hummingbird.velocity.y = 0;
+          console.log('Movement complete - hovering');
+        }
+      });
+    }
+
+    function updateVelocity() {
+      // Calculate velocity from position changes (for physics calculations)
+      const currentPos = { x: hummingbird.position.x, y: hummingbird.position.y };
+      
+      if (hummingbird.lastPosition) {
+        hummingbird.velocity.x = currentPos.x - hummingbird.lastPosition.x;
+        hummingbird.velocity.y = currentPos.y - hummingbird.lastPosition.y;
+      }
+      
+      hummingbird.lastPosition = { ...currentPos };
+      hummingbird.speed = calculateSpeed(hummingbird.velocity);
+    }
+
+    // Enhanced mouse move handler with movement triggering
+    function handleMouseMoveWithMovement(event) {
+      const now = Date.now();
+      
+      // Debouncing to prevent jittery movement
+      if (now - lastMouseMoveTime < CONFIG.PHYSICS.DEBOUNCE_TIME) {
+        return;
+      }
+      
+      // Get canvas-relative coordinates
+      const rect = canvas.getBoundingClientRect();
+      const rawX = event.clientX - rect.left;
+      const rawY = event.clientY - rect.top;
+      
+      // Edge constraints - constrain to canvas bounds
+      const constrainedX = Math.max(0, Math.min(canvas.width, rawX));
+      const constrainedY = Math.max(0, Math.min(canvas.height, rawY));
+      
+      mousePosition.x = constrainedX;
+      mousePosition.y = constrainedY;
+      lastMouseMoveTime = now;
+
+      // Check if we should start movement
+      if (now - lastTargetUpdate > CONFIG.PHYSICS.DEBOUNCE_TIME) {
+        startMovement(constrainedX, constrainedY);
+        lastTargetUpdate = now;
+      }
+      
+      // Log mouse position for testing
+      if (frameCount % 60 === 0) {
+        console.log(`Mouse: (${mousePosition.x.toFixed(1)}, ${mousePosition.y.toFixed(1)}), Distance: ${calculateDistance(hummingbird.position, mousePosition).toFixed(1)}px`);
+      }
+    }
+
+    // ========================================
+    // 7. UPDATE AND RENDER FUNCTIONS
     // ========================================
     function update(deltaTime) {
-      // Physics and animation updates will be implemented here
-      // For now, just placeholder
+      // Update velocity if moving
+      if (hummingbird.isMoving) {
+        updateVelocity();
+        updatePhysics();
+      }
+      
+      // Check if we've reached the target (hover detection)
+      const distanceToTarget = calculateDistance(hummingbird.position, hummingbird.targetPosition);
+      if (distanceToTarget <= CONFIG.PHYSICS.HOVER_THRESHOLD && hummingbird.isMoving) {
+        hummingbird.isMoving = false;
+        if (currentAnimation) {
+          currentAnimation.pause();
+        }
+        console.log('Reached target - switching to hover mode');
+      }
+    }
+
+    function updatePhysics() {
+      // Calculate speed from velocity
+      hummingbird.speed = calculateSpeed(hummingbird.velocity);
+      
+      // Calculate body tilt based on speed (upright hover → horizontal flight)
+      hummingbird.body.tilt = hummingbird.speed * 0.02; // From Implementation Specification
+      
+      // Calculate beak direction (always points toward travel direction)
+      if (hummingbird.speed > 0.1) { // Only update direction if moving
+        hummingbird.head.angle = Math.atan2(hummingbird.velocity.y, hummingbird.velocity.x);
+        hummingbird.body.angle = hummingbird.head.angle; // Body follows head direction
+      }
+      
+      // Tail adjusts opposite to movement for flight dynamics
+      if (hummingbird.speed > 0.1) {
+        hummingbird.tail.angle = hummingbird.head.angle + Math.PI; // Point opposite to movement
+      }
+      
+      // Log physics data for debugging
+      if (frameCount % 60 === 0 && hummingbird.isMoving) {
+        console.log(`Physics - Speed: ${hummingbird.speed.toFixed(2)}, Body Tilt: ${(hummingbird.body.tilt * 180 / Math.PI).toFixed(1)}°, Direction: ${(hummingbird.head.angle * 180 / Math.PI).toFixed(1)}°`);
+      }
     }
 
     function render() {
@@ -365,7 +500,7 @@
     }
 
     // ========================================
-    // 6. INITIALIZATION
+    // 8. INITIALIZATION
     // ========================================
     function init() {
       console.log('HumSim initializing...');
@@ -387,9 +522,9 @@
       // Start the main animation loop
       requestAnimationFrame(animationLoop);
       console.log('Animation loop started - Target: 60 FPS');
-      console.log('Phase 1 Complete: Basic infrastructure ready');
+      console.log('Step 2.1 Complete: Anime.js movement integrated');
       console.log('You should see a black polygonal hummingbird at screen center');
-      console.log('Move your mouse to see the red target dot');
+      console.log('Move your mouse to make the hummingbird follow with smooth easing!');
     }
 
     // Start the application
