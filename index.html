@@ -466,10 +466,12 @@
       // Calculate body tilt based on speed (upright hover → horizontal flight)
       hummingbird.body.tilt = hummingbird.speed * 0.02; // From Implementation Specification
       
+      // Calculate realistic body angle based on speed and movement direction
+      updateBodyAngle();
+      
       // Calculate beak direction (always points toward travel direction)
       if (hummingbird.speed > 0.1) { // Only update direction if moving
         hummingbird.head.angle = Math.atan2(hummingbird.velocity.y, hummingbird.velocity.x);
-        hummingbird.body.angle = hummingbird.head.angle; // Body follows head direction
       }
       
       // Tail adjusts opposite to movement for flight dynamics
@@ -479,8 +481,36 @@
       
       // Log physics data for debugging
       if (frameCount % 60 === 0 && hummingbird.isMoving) {
-        console.log(`Physics - Speed: ${hummingbird.speed.toFixed(2)}, Body Tilt: ${(hummingbird.body.tilt * 180 / Math.PI).toFixed(1)}°, Direction: ${(hummingbird.head.angle * 180 / Math.PI).toFixed(1)}°`);
+        console.log(`Physics - Speed: ${hummingbird.speed.toFixed(2)}, Body Angle: ${(hummingbird.body.angle * 180 / Math.PI).toFixed(1)}°, Head Direction: ${(hummingbird.head.angle * 180 / Math.PI).toFixed(1)}°`);
       }
+    }
+
+    function updateBodyAngle() {
+      const speed = hummingbird.speed;
+      const velocity = hummingbird.velocity;
+      
+      // Define angle ranges (in radians)
+      const hoverAngle = Math.PI / 6; // 30° from vertical (natural hovering posture)
+      const maxSpeedAngle = Math.PI * 0.94; // ~170° (nearly horizontal at full speed)
+      const maxExpectedSpeed = 20; // Maximum realistic speed for angle calculation
+      
+      // Calculate base angle from speed (30° hover to 170° full speed)
+      const normalizedSpeed = Math.min(speed / maxExpectedSpeed, 1);
+      const baseAngle = hoverAngle + (normalizedSpeed * (maxSpeedAngle - hoverAngle));
+      
+      // Calculate vertical movement adjustment
+      let verticalAdjustment = 0;
+      if (speed > 0.1) {
+        const verticalRatio = velocity.y / speed; // -1 (up) to +1 (down)
+        verticalAdjustment = verticalRatio * (Math.PI / 6); // ±30° adjustment
+      }
+      
+      // Calculate target body angle
+      const targetBodyAngle = baseAngle + verticalAdjustment;
+      
+      // Smooth interpolation to prevent jerky transitions
+      const lerpFactor = 0.1; // Adjust for smoother/faster transitions
+      hummingbird.body.angle = hummingbird.body.angle + (targetBodyAngle - hummingbird.body.angle) * lerpFactor;
     }
 
     function updateWingAnimation(deltaTime) {
