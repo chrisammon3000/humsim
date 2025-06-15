@@ -364,7 +364,54 @@
     }
 
     // ========================================
-    // 7. UPDATE AND RENDER FUNCTIONS
+    // 7. STATE MANAGEMENT SYSTEM
+    // ========================================
+    let currentState = 'hovering'; // 'hovering' or 'flying'
+    let stateTransitionTime = 0;
+
+    function updateMovementState() {
+      const distanceToTarget = calculateDistance(hummingbird.position, hummingbird.targetPosition);
+      const previousState = currentState;
+      
+      // Determine current state based on movement and proximity
+      if (hummingbird.isMoving && hummingbird.speed > 0.5) {
+        currentState = 'flying';
+      } else if (distanceToTarget <= CONFIG.PHYSICS.HOVER_THRESHOLD || hummingbird.speed < 0.1) {
+        currentState = 'hovering';
+      }
+      
+      // Handle state transitions
+      if (previousState !== currentState) {
+        stateTransitionTime = Date.now();
+        onStateTransition(previousState, currentState);
+      }
+    }
+
+    function onStateTransition(fromState, toState) {
+      console.log(`State transition: ${fromState} → ${toState}`);
+      
+      // Update wing animation based on new state
+      updateWingFrequency(toState);
+      
+      // Log state changes for debugging
+      if (frameCount % 60 === 0) {
+        console.log(`Current state: ${currentState}, Speed: ${hummingbird.speed.toFixed(2)}`);
+      }
+    }
+
+    function updateWingFrequency(state) {
+      const targetBPM = state === 'hovering' ? CONFIG.ANIMATION.HOVER_BPM : CONFIG.ANIMATION.FLIGHT_BPM;
+      const transitionTime = state === 'hovering' ? CONFIG.ANIMATION.RAMP_DOWN_TIME : CONFIG.ANIMATION.RAMP_UP_TIME;
+      
+      // Update wing BPM for both wings
+      hummingbird.leftWing.bpm = targetBPM;
+      hummingbird.rightWing.bpm = targetBPM;
+      
+      console.log(`Wing frequency updated: ${targetBPM} BPM (${state} mode)`);
+    }
+
+    // ========================================
+    // 8. UPDATE AND RENDER FUNCTIONS
     // ========================================
     function update(deltaTime) {
       // Update velocity if moving
@@ -372,6 +419,9 @@
         updateVelocity();
         updatePhysics();
       }
+      
+      // Update movement state and handle transitions
+      updateMovementState();
       
       // Check if we've reached the target (hover detection)
       const distanceToTarget = calculateDistance(hummingbird.position, hummingbird.targetPosition);
@@ -451,9 +501,13 @@
       ctx.save();
       ctx.translate(position.x, position.y);
       ctx.rotate(hummingbird.body.angle);
+      
+      // Apply body tilt based on flight speed (upright hover → horizontal flight)
+      ctx.scale(1, Math.cos(hummingbird.body.tilt));
+      
       ctx.fillStyle = CONFIG.COLORS.BODY;
       
-      // Draw hexagonal body
+      // Draw hexagonal body with sharp vertices
       ctx.beginPath();
       const sides = 6;
       const radius = dimensions.bodyWidth / 2;
@@ -472,9 +526,10 @@
     function drawTriangularHead(position, headState, dimensions) {
       ctx.save();
       ctx.translate(position.x + headState.offset.x, position.y + headState.offset.y);
-      ctx.rotate(headState.angle);
+      ctx.rotate(headState.angle); // Points toward movement direction
       ctx.fillStyle = CONFIG.COLORS.HEAD;
       
+      // Draw sharp triangular beak pointing forward
       ctx.beginPath();
       ctx.moveTo(0, 0); // Attachment point to body
       ctx.lineTo(dimensions.headBase/2, dimensions.headHeight);
@@ -487,9 +542,10 @@
     function drawTriangularTail(position, tailState, dimensions) {
       ctx.save();
       ctx.translate(position.x + tailState.offset.x, position.y + tailState.offset.y);
-      ctx.rotate(tailState.angle);
+      ctx.rotate(tailState.angle); // Adjusts for flight dynamics
       ctx.fillStyle = CONFIG.COLORS.TAIL;
       
+      // Draw small triangular tail for flight dynamics
       ctx.beginPath();
       ctx.moveTo(0, 0); // Attachment point to body
       ctx.lineTo(dimensions.tailBase/2, -dimensions.tailHeight);
@@ -500,7 +556,7 @@
     }
 
     // ========================================
-    // 8. INITIALIZATION
+    // 9. INITIALIZATION
     // ========================================
     function init() {
       console.log('HumSim initializing...');
@@ -522,9 +578,9 @@
       // Start the main animation loop
       requestAnimationFrame(animationLoop);
       console.log('Animation loop started - Target: 60 FPS');
-      console.log('Step 2.1 Complete: Anime.js movement integrated');
-      console.log('You should see a black polygonal hummingbird at screen center');
-      console.log('Move your mouse to make the hummingbird follow with smooth easing!');
+      console.log('Step 3.1 Complete: Polygonal hummingbird rendering with independent parts');
+      console.log('You should see a black polygonal hummingbird (hexagon body, triangular head/tail)');
+      console.log('Body tilts during flight, head points toward movement, tail adjusts dynamics!');
     }
 
     // Start the application
