@@ -489,14 +489,15 @@
       const speed = hummingbird.speed;
       const velocity = hummingbird.velocity;
       
-      // Define angle ranges (in radians)
-      const hoverAngle = Math.PI / 6; // 30° from vertical (natural hovering posture)
-      const maxSpeedAngle = Math.PI * 0.94; // ~170° (nearly horizontal at full speed)
-      const maxExpectedSpeed = 20; // Maximum realistic speed for angle calculation
+      // Define angle ranges (in radians from horizontal)
+      // 0 = horizontal, PI/2 = vertical up, -PI/2 = vertical down
+      const hoverAngle = Math.PI / 3; // 60° from horizontal (30° from vertical)
+      const maxSpeedAngle = Math.PI / 18; // ~10° from horizontal (nearly horizontal at full speed)
+      const maxExpectedSpeed = 15; // Maximum realistic speed for angle calculation
       
-      // Calculate base angle from speed (30° hover to 170° full speed)
+      // Calculate base angle from speed (60° from horizontal when hovering to 10° when darting)
       const normalizedSpeed = Math.min(speed / maxExpectedSpeed, 1);
-      const baseAngle = hoverAngle + (normalizedSpeed * (maxSpeedAngle - hoverAngle));
+      const baseAngle = hoverAngle - (normalizedSpeed * (hoverAngle - maxSpeedAngle));
       
       // Calculate vertical movement adjustment
       let verticalAdjustment = 0;
@@ -509,8 +510,13 @@
       const targetBodyAngle = baseAngle + verticalAdjustment;
       
       // Smooth interpolation to prevent jerky transitions
-      const lerpFactor = 0.1; // Adjust for smoother/faster transitions
+      const lerpFactor = 0.15; // Faster transitions to see the effect
       hummingbird.body.angle = hummingbird.body.angle + (targetBodyAngle - hummingbird.body.angle) * lerpFactor;
+      
+      // Debug logging
+      if (frameCount % 30 === 0) {
+        console.log(`Body Angle Debug - Speed: ${speed.toFixed(2)}, Target Angle: ${(targetBodyAngle * 180 / Math.PI).toFixed(1)}°, Current Angle: ${(hummingbird.body.angle * 180 / Math.PI).toFixed(1)}°`);
+      }
     }
 
     function updateWingAnimation(deltaTime) {
