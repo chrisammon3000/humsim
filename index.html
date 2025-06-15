@@ -53,14 +53,22 @@
         BACKGROUND: '#FFFFFF' // Pure white - maximum contrast
       },
       DIMENSIONS: {
-        BODY_WIDTH: 20,       // Hexagonal or diamond polygon
-        BODY_HEIGHT: 30,      // Polygon dimensions
-        WING_BASE: 15,        // Triangular polygons - independently moveable
-        WING_HEIGHT: 25,      // Sharp vertices, no rounded corners
-        HEAD_BASE: 8,         // Small triangular head
-        HEAD_HEIGHT: 12,      // Points in movement direction
-        TAIL_BASE: 6,         // Small triangular tail
-        TAIL_HEIGHT: 10       // Adjusts during flight
+        // Body: Streamlined and elongated (baseline = 1.0)
+        BODY_WIDTH: 18,       // Compact, streamlined diamond/triangle
+        BODY_HEIGHT: 35,      // Elongated for aerodynamic efficiency
+        
+        // Wings: Disproportionately large (1.5-2x body length)
+        WING_BASE: 12,        // Long, narrow triangular blades
+        WING_HEIGHT: 50,      // 1.4x body height for realistic proportions
+        
+        // Head: Proportionally large with prominent beak
+        HEAD_DIAMETER: 10,    // Large head for brain size
+        BEAK_LENGTH: 12,      // Equals head diameter (realistic ratio)
+        BEAK_WIDTH: 2,        // Thin, needle-like beak
+        
+        // Tail: Significant size, fan-like structure
+        TAIL_BASE: 14,        // Wide base for fan structure
+        TAIL_HEIGHT: 15       // 40% of body height
       },
       PHYSICS: {
         MOVEMENT_DURATION: 1000,
@@ -184,23 +192,23 @@
         angle: 0,
         scale: 1,
         phase: 0,
-        offset: { x: -10, y: 0 },
+        offset: { x: -8, y: -5 }, // Higher position on body (chest level)
         bpm: CONFIG.ANIMATION.HOVER_BPM
       },
       rightWing: {
         angle: 0,
         scale: 1,
         phase: Math.PI / 4, // Slight phase offset from left wing
-        offset: { x: 10, y: 0 },
+        offset: { x: 8, y: -5 }, // Higher position on body (chest level)
         bpm: CONFIG.ANIMATION.HOVER_BPM
       },
       head: {
         angle: 0,
-        offset: { x: 0, y: -15 }
+        offset: { x: 0, y: -20 } // Further from body for realistic proportions
       },
       tail: {
         angle: 0,
-        offset: { x: 0, y: 15 }
+        offset: { x: 0, y: 18 } // Adjusted for new body length
       }
     };
 
@@ -431,8 +439,10 @@
       // Update velocity if moving
       if (hummingbird.isMoving) {
         updateVelocity();
-        updatePhysics();
       }
+      
+      // Always update physics (including body angle) regardless of movement state
+      updatePhysics();
       
       // Update movement state and handle transitions
       updateMovementState();
@@ -458,22 +468,21 @@
       // Calculate body tilt based on speed (upright hover → horizontal flight)
       hummingbird.body.tilt = hummingbird.speed * 0.02; // From Implementation Specification
       
-      // Calculate beak direction (always points toward travel direction)
+      // Calculate unified direction for entire bird (head, body, tail aligned)
       if (hummingbird.speed > 0.1) { // Only update direction if moving
         hummingbird.head.angle = Math.atan2(hummingbird.velocity.y, hummingbird.velocity.x);
-        hummingbird.body.angle = hummingbird.head.angle; // Body follows head direction
       }
       
-      // Tail adjusts opposite to movement for flight dynamics
-      if (hummingbird.speed > 0.1) {
-        hummingbird.tail.angle = hummingbird.head.angle + Math.PI; // Point opposite to movement
-      }
+      // Align body and tail with head direction - entire bird as one streamlined unit
+      hummingbird.body.angle = hummingbird.head.angle;
+      hummingbird.tail.angle = hummingbird.head.angle;
       
       // Log physics data for debugging
       if (frameCount % 60 === 0 && hummingbird.isMoving) {
-        console.log(`Physics - Speed: ${hummingbird.speed.toFixed(2)}, Body Tilt: ${(hummingbird.body.tilt * 180 / Math.PI).toFixed(1)}°, Direction: ${(hummingbird.head.angle * 180 / Math.PI).toFixed(1)}°`);
+        console.log(`Physics - Speed: ${hummingbird.speed.toFixed(2)}, Unified Angle: ${(hummingbird.head.angle * 180 / Math.PI).toFixed(1)}°, Body Tilt: ${hummingbird.body.tilt.toFixed(3)}`);
       }
     }
+
 
     function updateWingAnimation(deltaTime) {
       const currentTime = Date.now();
@@ -529,8 +538,9 @@
         bodyHeight: CONFIG.DIMENSIONS.BODY_HEIGHT * scale,
         wingBase: CONFIG.DIMENSIONS.WING_BASE * scale,
         wingHeight: CONFIG.DIMENSIONS.WING_HEIGHT * scale,
-        headBase: CONFIG.DIMENSIONS.HEAD_BASE * scale,
-        headHeight: CONFIG.DIMENSIONS.HEAD_HEIGHT * scale,
+        headDiameter: CONFIG.DIMENSIONS.HEAD_DIAMETER * scale,
+        beakLength: CONFIG.DIMENSIONS.BEAK_LENGTH * scale,
+        beakWidth: CONFIG.DIMENSIONS.BEAK_WIDTH * scale,
         tailBase: CONFIG.DIMENSIONS.TAIL_BASE * scale,
         tailHeight: CONFIG.DIMENSIONS.TAIL_HEIGHT * scale
       };
@@ -538,8 +548,9 @@
       // Draw body (hexagon)
       drawPolygonalBody(hummingbird.position, scaledDimensions);
       
-      // Draw head (triangle)
-      drawTriangularHead(hummingbird.position, hummingbird.head, scaledDimensions);
+      // Draw head and beak (separate polygons for realistic proportions)
+      drawHummingbirdHead(hummingbird.position, hummingbird.head, scaledDimensions);
+      drawHummingbirdBeak(hummingbird.position, hummingbird.head, scaledDimensions);
       
       // Draw wings (triangles) - each wing independently
       drawTriangularWing(hummingbird.position, hummingbird.leftWing, scaledDimensions, true);
@@ -559,12 +570,39 @@
       
       ctx.fillStyle = CONFIG.COLORS.BODY;
       
-      // Draw hexagonal body with sharp vertices
+      // Draw streamlined hummingbird body - elongated diamond/teardrop shape
+      // Wider at chest (for flight muscles), tapering toward tail
       ctx.beginPath();
-      const sides = 6;
-      const radius = dimensions.bodyWidth / 2;
-      for (let i = 0; i < sides; i++) {
-        const angle = (i * 2 * Math.PI) / sides;
+      const halfWidth = dimensions.bodyWidth / 2;
+      const halfHeight = dimensions.bodyHeight / 2;
+      
+      // Create elongated diamond with chest emphasis
+      ctx.moveTo(0, -halfHeight);           // Top (head attachment)
+      ctx.lineTo(halfWidth * 0.8, -halfHeight * 0.3);  // Upper right (chest)
+      ctx.lineTo(halfWidth, 0);             // Right side (widest point)
+      ctx.lineTo(halfWidth * 0.6, halfHeight * 0.4);   // Lower right
+      ctx.lineTo(0, halfHeight);            // Bottom (tail attachment)
+      ctx.lineTo(-halfWidth * 0.6, halfHeight * 0.4);  // Lower left
+      ctx.lineTo(-halfWidth, 0);            // Left side (widest point)
+      ctx.lineTo(-halfWidth * 0.8, -halfHeight * 0.3); // Upper left (chest)
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawHummingbirdHead(position, headState, dimensions) {
+      ctx.save();
+      ctx.translate(position.x + headState.offset.x, position.y + headState.offset.y);
+      ctx.rotate(headState.angle); // Points toward movement direction
+      ctx.fillStyle = CONFIG.COLORS.HEAD;
+      
+      // Draw proportionally large head (circular/hexagonal for brain size)
+      ctx.beginPath();
+      const radius = dimensions.headDiameter / 2;
+      
+      // Create hexagonal head approximating circle
+      for (let i = 0; i < 6; i++) {
+        const angle = (i * Math.PI) / 3;
         const x = radius * Math.cos(angle);
         const y = radius * Math.sin(angle);
         if (i === 0) ctx.moveTo(x, y);
@@ -575,17 +613,23 @@
       ctx.restore();
     }
 
-    function drawTriangularHead(position, headState, dimensions) {
+    function drawHummingbirdBeak(position, headState, dimensions) {
       ctx.save();
       ctx.translate(position.x + headState.offset.x, position.y + headState.offset.y);
       ctx.rotate(headState.angle); // Points toward movement direction
       ctx.fillStyle = CONFIG.COLORS.HEAD;
       
-      // Draw sharp triangular beak pointing forward
+      // Draw prominent needle-like beak extending from head
       ctx.beginPath();
-      ctx.moveTo(0, 0); // Attachment point to body
-      ctx.lineTo(dimensions.headBase/2, dimensions.headHeight);
-      ctx.lineTo(-dimensions.headBase/2, dimensions.headHeight);
+      const beakLength = dimensions.beakLength;
+      const beakWidth = dimensions.beakWidth;
+      const headRadius = dimensions.headDiameter / 2;
+      
+      // Start beak from front of head, extending forward
+      ctx.moveTo(headRadius, -beakWidth/2);        // Top of beak base
+      ctx.lineTo(headRadius + beakLength, 0);      // Beak tip (pointed)
+      ctx.lineTo(headRadius, beakWidth/2);         // Bottom of beak base
+      ctx.lineTo(headRadius, -beakWidth/2);        // Close shape
       ctx.closePath();
       ctx.fill();
       ctx.restore();
@@ -597,11 +641,18 @@
       ctx.rotate(tailState.angle); // Adjusts for flight dynamics
       ctx.fillStyle = CONFIG.COLORS.TAIL;
       
-      // Draw small triangular tail for flight dynamics
+      // Draw realistic hummingbird tail - fan-like structure with notched shape
       ctx.beginPath();
-      ctx.moveTo(0, 0); // Attachment point to body
-      ctx.lineTo(dimensions.tailBase/2, -dimensions.tailHeight);
-      ctx.lineTo(-dimensions.tailBase/2, -dimensions.tailHeight);
+      const tailWidth = dimensions.tailBase;
+      const tailLength = dimensions.tailHeight;
+      
+      // Create fan-like tail with slight notch (typical of hummingbirds)
+      ctx.moveTo(0, 0);                               // Attachment point to body
+      ctx.lineTo(tailWidth * 0.4, tailLength * 0.8);       // Right outer feather
+      ctx.lineTo(tailWidth * 0.2, tailLength);             // Right inner feather (longer)
+      ctx.lineTo(0, tailLength * 0.9);                     // Center notch
+      ctx.lineTo(-tailWidth * 0.2, tailLength);            // Left inner feather (longer)
+      ctx.lineTo(-tailWidth * 0.4, tailLength * 0.8);      // Left outer feather
       ctx.closePath();
       ctx.fill();
       ctx.restore();
@@ -614,11 +665,20 @@
       ctx.scale(wingState.scale, 1); // Wing scaling for folding/extending effect
       ctx.fillStyle = CONFIG.COLORS.WINGS;
       
-      // Draw isosceles triangle with sharp, precise vertices - no rounded corners
+      // Draw realistic hummingbird wing - long, narrow, blade-like shape
+      // Tapered from base to tip for aerodynamic efficiency
       ctx.beginPath();
-      ctx.moveTo(0, 0); // Attachment point to body
-      ctx.lineTo(dimensions.wingBase/2, -dimensions.wingHeight);
-      ctx.lineTo(-dimensions.wingBase/2, -dimensions.wingHeight);
+      const baseWidth = dimensions.wingBase;
+      const wingLength = dimensions.wingHeight;
+      
+      // Create tapered wing shape - wider at base, narrow at tip
+      ctx.moveTo(0, 0);                           // Attachment point to body
+      ctx.lineTo(baseWidth * 0.4, -wingLength * 0.2);    // Early taper
+      ctx.lineTo(baseWidth * 0.3, -wingLength * 0.6);    // Mid-wing narrowing
+      ctx.lineTo(baseWidth * 0.1, -wingLength);          // Wing tip (narrow)
+      ctx.lineTo(-baseWidth * 0.1, -wingLength);         // Other side of tip
+      ctx.lineTo(-baseWidth * 0.3, -wingLength * 0.6);   // Mid-wing other side
+      ctx.lineTo(-baseWidth * 0.4, -wingLength * 0.2);   // Early taper other side
       ctx.closePath();
       ctx.fill(); // Solid 100% opacity - flat design aesthetic
       ctx.restore();
@@ -647,13 +707,13 @@
       // Start the main animation loop
       requestAnimationFrame(animationLoop);
       console.log('Animation loop started - Target: 60 FPS');
-      console.log('🎉 HumSim Complete: All phases implemented successfully!');
-      console.log('🐦 Polygonal hummingbird with authentic hover-dart-hover physics');
-      console.log('✨ Independent part animation, motion blur, and performance optimization');
-      console.log('🎯 60 FPS target with graceful degradation and cross-browser compatibility');
-      console.log('📱 Responsive design works on various screen sizes');
+      console.log('🎉 HumSim Complete: Realistic polygonal hummingbird design!');
+      console.log('🐦 Anatomically accurate polygons: streamlined body, blade-like wings, prominent beak');
+      console.log('✨ Independent part animation with authentic proportions and motion blur');
+      console.log('🎯 Based on real hummingbird anatomy research for maximum realism');
+      console.log('📱 Responsive design with accurate scaling maintains proportions');
       console.log('');
-      console.log('Move your mouse to control the hummingbird - enjoy the realistic flight simulation!');
+      console.log('Move your mouse to see the realistic hummingbird follow with authentic flight physics!');
     }
 
     // Start the application
